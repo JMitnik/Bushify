@@ -2,9 +2,13 @@
 import os
 import matplotlib.pyplot as plt
 import cv2
+import augment
+
 abs_path = os.path.dirname(os.path.abspath("__file__"))
 bush_path = abs_path+'/data/all_og/'
 not_bush_path = abs_path+'/data/not_bush/'
+pp_bush = abs_path+'/data/pp_bush/'
+pp_not_bush = abs_path+'/data/pp_not_bush/'
 
 CASCADE_FILE_SRC = abs_path+"/model/haarcascade_frontalface_default.xml"
 FACE_CASCADE = cv2.CascadeClassifier(CASCADE_FILE_SRC)
@@ -42,6 +46,8 @@ def writeImage(img, filename):
 def preProcessDataSet(src, filenames):
     for name in filenames:
         preProcessImage(src+name, name)
+
+    augment.augmentImagesInPath(filenames, src)
     return
 
 preProcessDataSet(not_bush_path, os.listdir(not_bush_path))
