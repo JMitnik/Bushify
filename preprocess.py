@@ -23,7 +23,6 @@ def preProcessImage(img, filename):
         return
 
     resizedFace = cv2.resize(face, (50,50))
-    print(resizedFace)
     writeImage(resizedFace, filename)
 
 def detectFace(img):
@@ -47,7 +46,7 @@ def preProcessDataSet(src, filenames):
     for name in filenames:
         preProcessImage(src+name, name)
 
-    augment.augmentImagesInPath(filenames, src)
+    # augment.augmentImagesInPath(filenames, src)
     return
 
 preProcessDataSet(not_bush_path, os.listdir(not_bush_path))
