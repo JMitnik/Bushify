@@ -22,7 +22,7 @@ def preProcessImage(img, filename):
     except IndexError:
         return
 
-    resizedFace = cv2.resize(face, (50,50))
+    resizedFace = cv2.resize(image, (50,50))
     writeImage(resizedFace, filename)
 
 def detectFace(img):
@@ -39,7 +39,7 @@ def detectFace(img):
 
 def writeImage(img, filename):
     fileName = 'pp_'+filename
-    cv2.imwrite(abs_path+'/data/pp_notbush/'+fileName, img)
+    cv2.imwrite(abs_path+'/data/trainTransfer/'+fileName, img)
 
 
 def preProcessDataSet(src, filenames):

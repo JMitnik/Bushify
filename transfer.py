@@ -4,11 +4,11 @@ from keras.models import Sequential
 from keras.optimizers import Adam
 
 def get_transfer_model():
-    transfer_model = VGG16(include_top=False, weights='imagenet', input_shape=(50,50, 3))
+    transfer_model = VGG16(include_top=False, weights='imagenet', input_shape=(50, 50, 3))
 
     full_connected_bush_block = Sequential()
 
-    full_connected_bush_block.add(Flatten(input_shape=(50, 50, 3)))
+    full_connected_bush_block.add(Flatten(input_shape=transfer_model.output_shape[1:]))
     full_connected_bush_block.add(Dense(256, activation='relu'))
     full_connected_bush_block.add(Dropout(0.5))
     full_connected_bush_block.add(Dense(1, activation='sigmoid'))
@@ -20,7 +20,7 @@ def get_transfer_model():
 
     end_model.add(full_connected_bush_block)
 
-    for i in end_model.layers[:25]:
+    for i in end_model.layers[:19]:
         i.trainable = False
 
     end_model.compile(loss='binary_crossentropy', optimizer=Adam(), metrics=['accuracy'])
