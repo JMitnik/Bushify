@@ -4,8 +4,8 @@ from keras.preprocessing.image import ImageDataGenerator
 
 #%%
 
-
 def validate_model(model: Sequential, epochs=10):
+    print("In validator")
     batch = 16
 
     train_datagen = ImageDataGenerator(
