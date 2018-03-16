@@ -1,0 +1,15 @@
+.box {
+    background: white;
+    box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
+
+    .box-heading {
+        text-align: center;
+        background: darken(white, 2%);
+        font-family: $title-font-family;
+        padding: $gutter / 3 $gutter / 2;
+    }
+
+    .box-body {
+        padding: $gutter / 2;
+    }
+}

@@ -14,15 +14,15 @@ def hello():
   dog = "test"
   return dog + dog
 
-@app.route("/test", methods=['POST', 'PUT'])
+@app.route("/upload_file", methods=['POST', 'PUT'])
 def test_file_input():
-    file = request.files['test']
-    (face_img, file_name) = preprocessor(file)
+    file = request.files['image']
+    (face_img, public_image, file_name) = preprocessor(file)
     face_array = np.expand_dims(img_to_array(face_img), axis=0)
 
     print("Starting prediction!")
-    prediction = model.predict(face_array)
-    return make_response(jsonify(image_url=file_name, bush=prediction))
+    # prediction = model.predict(face_array)
+    return make_response(jsonify(image_url=public_image, bush="false"))
 
 if __name__ == "__main__":
   print("Prevalidation")

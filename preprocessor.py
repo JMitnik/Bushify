@@ -17,19 +17,20 @@ def preprocessor(file):
     data = np.fromstring(in_memory_file.getvalue(), dtype=np.uint8)
     color_image_flag = 1
     img = cv2.imdecode(data, color_image_flag)
-    img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
-    faces = FACE_CASCADE.detectMultiScale(img, 1.2, 5)
+    faces = FACE_CASCADE.detectMultiScale(gray, 1.2, 5)
 
     for (x, y, w, h) in faces:
         box = cv2.rectangle(img, (x, y), (x+w, y+h), (0, 255, 0), 2)
 
     (x, y, w, h) = faces[0]
 
-    croppedFace = img[y:y+w, x:x+h]
+    croppedFace = gray[y:y+w, x:x+h]
 
     testFace = cv2.resize(croppedFace, (50, 50))
     cv2.imwrite(UPLOAD_FOLDER+filename, testFace)
+    cv2.imwrite(UPLOAD_FOLDER+"rect_"+filename, img)
 
     # file.save(os.path.join(UPLOAD_FOLDER, filename))
-    return (testFace, 'uploads/'+filename)
+    return (testFace, 'uploads/rect_'+filename, 'uploads/'+filename)
