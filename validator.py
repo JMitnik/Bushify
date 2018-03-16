@@ -1,12 +1,7 @@
 #%%
-from keras.models import Sequential
 from keras.preprocessing.image import ImageDataGenerator
 
 #%%
-
-def validate_model(model: Sequential, epochs=10):
-    print("In validator")
-    batch = 16
 
     train_datagen = ImageDataGenerator(
         rescale=1./255,
@@ -29,9 +24,3 @@ def validate_model(model: Sequential, epochs=10):
         target_size=(50, 50),
         batch_size=batch,
         class_mode='binary')
-
-    model.fit_generator(train_generator, epochs=epochs,
-                        validation_data=validation_generator)
-    # model.save_weights('first_try.h5')
-
-    return model
