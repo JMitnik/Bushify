@@ -5,25 +5,23 @@ import cv2
 import augment
 
 abs_path = os.path.dirname(os.path.abspath("__file__"))
-bush_path = abs_path+'/data/all_og/'
-not_bush_path = abs_path+'/data/not_bush/'
-pp_bush = abs_path+'/data/pp_bush/'
-pp_not_bush = abs_path+'/data/pp_not_bush/'
-
 CASCADE_FILE_SRC = abs_path+"/model/haarcascade_frontalface_default.xml"
 FACE_CASCADE = cv2.CascadeClassifier(CASCADE_FILE_SRC)
 
-def preProcessImage(img, filename):
-    image = cv2.imread(img)
-    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+def preProcessImage(img):
+    cv2_image = cv2.imread(img)
+    grayscaled_image = cv2.cvtColor(cv2_image, cv2.COLOR_BGR2GRAY)
 
     try:
-        face = detectFace(gray)
+        face_coordinates = detectFace(grayscaled_image)
+        (x, y, w, h) = face_coordinates
     except IndexError:
-        return
+        raise
 
-    resizedFace = cv2.resize(image, (50,50))
-    writeImage(resizedFace, filename)
+    face = cv2_image[y:y+w, x:x+h]
+    resized_face = cv2.resize(face, (150, 150))
+
+    return resized_face
 
 def detectFace(img):
     faces = FACE_CASCADE.detectMultiScale(img, 1.2, 5)
@@ -31,24 +29,25 @@ def detectFace(img):
     for (x, y, w, h) in faces:
         box = cv2.rectangle(img, (x, y), (x+w, y+h), (0, 255, 0), 2)
 
-    (x, y, w, h) = faces[0]
+    return faces[0]
 
-    croppedFace = img[y:y+w, x:x+h]
+def writeImage(img, output_path, filename):
+    cv2.imwrite(abs_path+'/data/faces/'+output_path+'/'+filename, img)
 
-    return croppedFace
-
-def writeImage(img, filename):
-    fileName = 'pp_'+filename
-    cv2.imwrite(abs_path+'/data/trainTransfer/'+fileName, img)
-
-
-def preProcessDataSet(src, filenames):
-    for name in filenames:
-        preProcessImage(src+name, name)
-
-    # augment.augmentImagesInPath(filenames, src)
+def preProcessDataSet(files, source_path, output_path):
+    for file in files:
+        try:
+            pp_image = preProcessImage(source_path+'/'+file)
+            writeImage(pp_image, output_path, file)
+        except Exception as e:
+            print("No image recognized")
     return
 
-preProcessDataSet(not_bush_path, os.listdir(not_bush_path))
+start_folder = abs_path+'/data/normal'
 
-#%%
+def recursiveWalk(start_folder):
+    for current, dirs, files in os.walk(start_folder):
+        if any('.jpg' in i for i in files):
+            preProcessDataSet(files, current ,current[(len(start_folder) + 1):])
+
+recursiveWalk(start_folder)

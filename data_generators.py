@@ -1,4 +1,5 @@
 from keras.preprocessing.image import ImageDataGenerator
+from sklearn.model_selection import train_test_split, StratifiedKFold
 
 def make_default_image_generators():
     train_image_gen = ImageDataGenerator(
@@ -28,10 +29,13 @@ def make_data_generators(img_generator_tuple, source_glob=None, dimension_tuple=
         print(e)
 
 
-sm_gray_data = make_data_generators(make_default_image_generators, 'gray', (50, 50))
-md_gray_data = make_data_generators(make_default_image_generators, 'gray', (100, 100))
-lg_gray_data = make_data_generators(make_default_image_generators, 'gray', (150, 150))
+# def cross_folds(k=10):
 
-sm_color_data = make_data_generators(make_default_image_generators, dimension_tuple=(50, 50))
-md_color_data = make_data_generators(make_default_image_generators, dimension_tuple=(100, 100))
-lg_color_data = make_data_generators(make_default_image_generators, dimension_tuple=(150, 150))
+
+# sm_gray_data = make_data_generators(make_default_image_generators, 'gray', (50, 50))
+# md_gray_data = make_data_generators(make_default_image_generators, 'gray', (100, 100))
+# lg_gray_data = make_data_generators(make_default_image_generators, 'gray', (150, 150))
+
+# sm_color_data = make_data_generators(make_default_image_generators, dimension_tuple=(50, 50))
+# md_color_data = make_data_generators(make_default_image_generators, dimension_tuple=(100, 100))
+# lg_color_data = make_data_generators(make_default_image_generators, dimension_tuple=(150, 150))
