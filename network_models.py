@@ -8,7 +8,7 @@ from keras.applications import VGG16
 def make_alpha_model():
     model = Sequential()
 
-    model.add(Conv2D(32, (3, 3), input_shape=(50, 50, 1), dim_ordering="tf"))
+    model.add(Conv2D(32, (3, 3), input_shape=(150, 150, 1), dim_ordering="tf"))
     model.add(Activation('relu'))
     model.add(MaxPooling2D(pool_size=(2, 2)))
 
