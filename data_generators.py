@@ -13,6 +13,18 @@ from keras.utils import np_utils
 from FaceModel import FaceModel
 from sklearn.preprocessing import LabelEncoder
 from sklearn.preprocessing import OneHotEncoder
+from keras.callbacks import ModelCheckpoint, EarlyStopping, LambdaCallback
+
+outputFolder = './output-mnist'
+if not os.path.exists(outputFolder):
+    os.makedirs(outputFolder)
+filepath = outputFolder+"/weights-{epoch:02d}-{val_acc:.2f}.hdf5"
+checkpoint = ModelCheckpoint(filepath, monitor='val_acc', verbose=1,
+                             save_best_only=False, save_weights_only=False,
+                             mode='auto', period=10)
+earlystop = EarlyStopping(monitor='val_acc', min_delta=0.0001, patience=5,
+                        verbose=1, mode='auto')
+callbacks_list = [checkpoint, earlystop]
 
 def get_im(path):
     # Load as grayscale
@@ -89,10 +101,18 @@ def cross_validate_test(make_model_callback, folds=10, epochs=10, batch_size=16)
         model.validation_train(train_data, valid_data, (train_image_gen, val_image_gen), epochs, batch_size)
         eval_result.append(model)
 
-# sm_gray_data = make_data_generators(make_default_image_generators, 'gray', (50, 50))
-# md_gray_data = make_data_generators(make_default_image_generators, 'gray', (100, 100))
-# lg_gray_data = make_data_generators(make_default_image_generators, 'gray', (150, 150))
+def get_train_and_valid_data(valid_size=0.2):
+    (X, Y) = load_train()
+    (X, Y) = format_data(X, Y)
 
-# sm_color_data = make_data_generators(make_default_image_generators, dimension_tuple=(50, 50))
-# md_color_data = make_data_generators(make_default_image_generators, dimension_tuple=(100, 100))
-# lg_color_data = make_data_generators(make_default_image_generators, dimension_tuple=(150, 150))
+    (x_train, x_valid, y_train, y_valid) = train_test_split(X, Y, test_size=valid_size)
+
+    train_data = (x_train, y_train)
+    valid_data = (x_valid, y_valid)
+    return (train_data, valid_data)
+
+def train_model(model, model_name="name", epochs=50, batch_size=16):
+    (train_image_gen, val_image_gen) = make_default_image_generators()
+    (train_data, valid_data) = get_train_and_valid_data()
+    model.fit_generator(train_image_gen.flow(train_data[0], train_data[1], batch_size), callbacks=callbacks_list, epochs=epochs, validation_data=val_image_gen.flow(valid_data[0], valid_data[1]))
+    return model

@@ -8,6 +8,7 @@ import FileService from './FileService';
 class ImageCanvas extends Component {
     state = {
         isLoading: false,
+        prediction: null,
         stagedFile: null
     };
 
@@ -19,8 +20,10 @@ class ImageCanvas extends Component {
 
         FileService.uploadFile(file)
             .then(res => {
+                console.log(res);
                 this.setState({
                     isLoading: false,
+                    prediction: res.prediction,
                     stagedFile: res.image_url
                 });
             });
@@ -30,6 +33,19 @@ class ImageCanvas extends Component {
         if (this.state.isLoading) {
             return <Spinner></Spinner>;
         }
+    }
+
+    renderPrediction = () => {
+        if (this.state.prediction) {
+
+            if (this.state.prediction[0][0] == 1) {
+                return <span className="bush-pred">Bush!</span>
+            } else {
+                return <span className="non-bush-pred">Not bush!</span>
+            }
+        }
+
+        return <span></span>
     }
 
     renderPrompt = () => {
@@ -45,6 +61,7 @@ class ImageCanvas extends Component {
 
                             <input className="mg-t-md" type="file" onChange={e => this.handleFileUpload(e)}/>
                         </div>
+
                     </div>
                 </div>
             );
@@ -63,6 +80,7 @@ class ImageCanvas extends Component {
                 {this.renderSpinner()}
                 {this.renderPrompt()}
                 {this.renderPolaroid()}
+                <div>{this.renderPrediction()}</div>
             </div>
         );
     }

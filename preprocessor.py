@@ -28,7 +28,7 @@ def preprocessor(file):
 
     croppedFace = gray[y:y+w, x:x+h]
 
-    testFace = cv2.resize(croppedFace, (50, 50))
+    testFace = cv2.resize(croppedFace, (150, 150))
     cv2.imwrite(UPLOAD_FOLDER+filename, testFace)
     cv2.imwrite(UPLOAD_FOLDER+"rect_"+filename, img)
 
