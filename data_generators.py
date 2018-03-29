@@ -13,18 +13,23 @@ from keras.utils import np_utils
 from FaceModel import FaceModel
 from sklearn.preprocessing import LabelEncoder
 from sklearn.preprocessing import OneHotEncoder
-from keras.callbacks import ModelCheckpoint, EarlyStopping, LambdaCallback
+from keras.callbacks import ModelCheckpoint, EarlyStopping, LambdaCallback, TensorBoard
+from time import time
 
 outputFolder = './output-mnist'
 if not os.path.exists(outputFolder):
     os.makedirs(outputFolder)
 filepath = outputFolder+"/weights-{epoch:02d}-{val_acc:.2f}.hdf5"
+
+endfilepath = outputFolder+"/weights-end.hdf5"
 checkpoint = ModelCheckpoint(filepath, monitor='val_acc', verbose=1,
                              save_best_only=False, save_weights_only=False,
                              mode='auto', period=10)
 earlystop = EarlyStopping(monitor='val_acc', min_delta=0.0001, patience=5,
                         verbose=1, mode='auto')
-callbacks_list = [checkpoint, earlystop]
+tensorboard = TensorBoard(log_dir="logs/{}".format(time()))
+
+callbacks_list = [checkpoint, earlystop, tensorboard]
 
 def get_im(path):
     # Load as grayscale
@@ -64,15 +69,15 @@ def make_default_image_generators():
 
     return (train_image_gen, val_image_gen)
 
-def make_data_generators(source_glob=None, dimension_tuple=(150,150), batch_size=16):
-    (train_img_gen, val_img_gen) = make_default_image_generators()
+# def make_data_generators(source_glob=None, dimension_tuple=(150,150), batch_size=16):
+#     (train_img_gen, val_img_gen) = make_default_image_generators()
 
-    try:
-        train_data_gen = train_img_gen.flow_from_directory('data'+source_glob+'training', target_size=dimension_tuple, batch_size=batch_size, class_mode='binary')
-        val_data_gen = val_img_gen.flow_from_directory('data'+source_glob+'validation', target_size=dimension_tuple, batch_size=batch_size, class_mode='binary')
-        return (train_data_gen, val_data_gen)
-    except Exception as e:
-        print(e)
+#     try:
+#         train_data_gen = train_img_gen.flow_from_directory('data'+source_glob+'training', target_size=dimension_tuple, batch_size=batch_size, class_mode='binary')
+#         val_data_gen = val_img_gen.flow_from_directory('data'+source_glob+'validation', target_size=dimension_tuple, batch_size=batch_size, class_mode='binary')
+#         return (train_data_gen, val_data_gen)
+#     except Exception as e:
+#         print(e)
 
 def format_data(train_x, train_y):
     train_x = np.array(train_x, dtype=np.uint8)
@@ -82,24 +87,24 @@ def format_data(train_x, train_y):
 
     return (train_x, train_y)
 
-def cross_validate_test(make_model_callback, folds=10, epochs=10, batch_size=16):
-    (train_image_gen, val_image_gen) = make_default_image_generators()
+# def cross_validate_test(make_model_callback, folds=10, epochs=10, batch_size=16):
+#     (train_image_gen, val_image_gen) = make_default_image_generators()
 
-    (X, Y) = load_train()
-    (X, Y) = format_data(X, Y)
+#     (X, Y) = load_train()
+#     (X, Y) = format_data(X, Y)
 
-    kfolds = StratifiedKFold(folds)
-    eval_result = []
+#     kfolds = StratifiedKFold(folds)
+#     eval_result = []
 
-    for (train_idx, val_idx) in kfolds.split(X, Y):
-        model = FaceModel(make_model_callback)
-        x_train, x_valid = X[train_idx], X[val_idx]
-        y_train, y_valid = Y[train_idx], Y[val_idx]
+#     for (train_idx, val_idx) in kfolds.split(X, Y):
+#         model = FaceModel(make_model_callback)
+#         x_train, x_valid = X[train_idx], X[val_idx]
+#         y_train, y_valid = Y[train_idx], Y[val_idx]
 
-        train_data = (x_train, y_train)
-        valid_data = (x_valid, y_valid)
-        model.validation_train(train_data, valid_data, (train_image_gen, val_image_gen), epochs, batch_size)
-        eval_result.append(model)
+#         train_data = (x_train, y_train)
+#         valid_data = (x_valid, y_valid)
+#         model.validation_train(train_data, valid_data, (train_image_gen, val_image_gen), epochs, batch_size)
+#         eval_result.append(model)
 
 def get_train_and_valid_data(valid_size=0.2):
     (X, Y) = load_train()
@@ -114,5 +119,9 @@ def get_train_and_valid_data(valid_size=0.2):
 def train_model(model, model_name="name", epochs=50, batch_size=16):
     (train_image_gen, val_image_gen) = make_default_image_generators()
     (train_data, valid_data) = get_train_and_valid_data()
-    model.fit_generator(train_image_gen.flow(train_data[0], train_data[1], batch_size), callbacks=callbacks_list, epochs=epochs, validation_data=val_image_gen.flow(valid_data[0], valid_data[1]))
-    return model
+    history = model.fit_generator(train_image_gen.flow(train_data[0], train_data[1], batch_size),
+        callbacks=callbacks_list, epochs=epochs, validation_data=val_image_gen.flow(valid_data[0], valid_data[1]))
+    print("Done with the fitting!")
+    model.save(endfilepath)
+    print("Saved last epoch!")
+    return history, model

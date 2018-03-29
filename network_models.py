@@ -3,6 +3,7 @@ from keras.layers import Conv2D, Activation, Dropout, Flatten, Dense, MaxPooling
 from keras.optimizers import Adam
 from keras.preprocessing.image import ImageDataGenerator
 from keras.applications import VGG16
+from metrics import precision, recall
 
 # Default Keras Neural Network with 3 conv2d-block
 def make_alpha_model():
@@ -28,7 +29,35 @@ def make_alpha_model():
     model.add(Activation('sigmoid'))
 
     model.compile(loss='binary_crossentropy',
-              optimizer=Adam(), metrics=['accuracy'])
+              optimizer=Adam(), metrics=['accuracy', precision, recall])
+
+    return model
+
+# Default Keras Neural Network with 3 conv2d-block
+def make_beta_model():
+    model = Sequential()
+
+    model.add(Conv2D(32, (3, 3), input_shape=(150, 150, 1), dim_ordering="tf"))
+    model.add(Activation('relu'))
+    model.add(MaxPooling2D(pool_size=(2, 2)))
+
+    model.add(Conv2D(32, (3, 3)))
+    model.add(Activation('relu'))
+    model.add(MaxPooling2D(pool_size=(2, 2)))
+
+    model.add(Conv2D(64, (3, 3)))
+    model.add(Activation('relu'))
+    model.add(MaxPooling2D(pool_size=(2, 2)))
+
+    model.add(Flatten())
+    model.add(Dense(64))
+    model.add(Activation('relu'))
+    model.add(Dropout(0.5))
+    model.add(Dense(1))
+    model.add(Activation('sigmoid'))
+
+    model.compile(loss='binary_crossentropy',
+              optimizer=Adam(), metrics=['accuracy', recall, precision])
 
     return model
 
@@ -54,6 +83,6 @@ def make_transfer_model():
         i.trainable = False
 
     end_model.compile(loss='binary_crossentropy',
-                      optimizer=Adam(), metrics=['accuracy'])
+                      optimizer=Adam(), metrics=['accuracy', recall, precision])
 
     return end_model
