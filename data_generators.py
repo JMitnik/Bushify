@@ -57,6 +57,24 @@ def load_train():
 
     return X_train, y_train
 
+def load_test():
+    x_test = []
+    y_test = []
+    classes = ['0-not_bush', '1-bush']
+    print('Read test images')
+    for c in classes:
+        print('Load folder class {}'.format(c))
+        path = os.path.join('data', 'faces',
+                            'test', c, '*.jpg')
+        files = glob.glob(path)
+        for fl in files:
+            img = get_im(fl)
+            x_test.append(img)
+            y_test.append(c)
+
+    return (x_test, y_test)
+
+
 def make_default_image_generators():
     train_image_gen = ImageDataGenerator(
         rescale=1./255,
@@ -125,3 +143,59 @@ def train_model(model, model_name="name", epochs=50, batch_size=16):
     model.save(endfilepath)
     print("Saved last epoch!")
     return history, model
+
+
+def format_test_data(x, y):
+    test_x = np.array(x, dtype=np.uint8)
+    test_y = np.array(y)
+    test_x = test_x.reshape(test_x.shape[0], 150, 150, 1)
+    test_y = encodeLabels(test_y)
+
+    return (test_x, test_y)
+
+def confusion_matrix(model, X, Y):
+    TP = 0
+    FN = 0
+    FP = 0
+    TN = 0
+
+    for i in range(X.shape[0]):
+        test_run = np.expand_dims(X[i], axis=0)
+        prediction = np.round(model.predict(test_run))
+        label = Y[i]
+
+        if (label == 1):
+            if prediction[0][0] == label:
+                TP += 1
+
+            else:
+                FN += 1
+        else:
+            if prediction[0][0] == label:
+                TN += 1
+            else:
+                FP += 1
+
+    return (TP, FN, FP, TN)
+
+def test_model(model):
+    (X, Y) = load_test()
+    (X, Y) = format_test_data(X, Y)
+
+    (TP, FN, FP, TN) = confusion_matrix(model, X, Y)
+    recall = (TP / (TP + FN))
+    precision = (TP / (TP + FP))
+    print(Y.shape)
+    accuracy = ((TP + TN) / Y.shape[0])
+
+    results = {
+        'TP': TP,
+        'FN': FN,
+        'FP': FP,
+        'TN': TN,
+        'Precision': precision,
+        'Recall': recall,
+        'Accuracy': accuracy
+    }
+
+    return results

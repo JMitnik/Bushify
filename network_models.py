@@ -62,7 +62,7 @@ def make_beta_model():
     return model
 
 def make_transfer_model():
-    transfer_model = VGG16(include_top=False, weights='imagenet', input_shape=(50, 50, 3))
+    transfer_model = VGG16(include_top=False, weights='imagenet', input_shape=(150, 150, 3))
 
     full_connected_bush_block = Sequential()
 
