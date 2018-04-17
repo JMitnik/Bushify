@@ -9,7 +9,7 @@ from metrics import precision, recall
 def make_alpha_model():
     model = Sequential()
 
-    model.add(Conv2D(32, (3, 3), input_shape=(150, 150, 1), dim_ordering="tf"))
+    model.add(Conv2D(32, (3, 3), input_shape=(150, 150, 3), dim_ordering="tf"))
     model.add(Activation('relu'))
     model.add(MaxPooling2D(pool_size=(2, 2)))
 
@@ -82,7 +82,6 @@ def make_transfer_model():
     for i in end_model.layers[:19]:
         i.trainable = False
 
-    end_model.compile(loss='binary_crossentropy',
-                      optimizer=Adam(), metrics=['accuracy', recall, precision])
+    end_model.compile(loss='binary_crossentropy', optimizer=Adam(), metrics=['accuracy', recall, precision])
 
     return end_model
